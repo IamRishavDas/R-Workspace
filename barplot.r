@@ -9,3 +9,4 @@ barplot(mtcars$cyl) #does not work
 cylinder <- table(mtcars$cyl) #create table
 barplot(cylinder)             #bar chart
 plot(cylinder)                #default x-y plot (lines)
+
