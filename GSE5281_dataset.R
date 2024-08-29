@@ -27,7 +27,7 @@ if (max(data, na.rm = TRUE) > 100) {
 data <- normalizeBetweenArrays(data)
 
   
-k <- 3  # no of clusters
+k <- 4 # no of clusters
 
 # Perform k-means clustering
 set.seed(123)  # Set seed for reproducibility
