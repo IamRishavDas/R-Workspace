@@ -15,6 +15,7 @@ sample_data <- pData(geo_data)
 feature_data <- fData(geo_data)
 
 head(expression_data)
+print(expression_data[1:10, 1])
 head(sample_data)
 head(feature_data)
 
@@ -45,38 +46,75 @@ normalized_dataset <- as.data.frame(lapply(data[, 2:174], function(x) {
 
 write.csv(normalized_dataset, "Normalized_GSE11882_expression_data.csv", row.names = FALSE)
 
+print(n_data)
 n_data <- Normalized_GSE11882_expression_data
 n_data <- GSE11882_expression_data # for testing on raw data
 
-# clustering k means using multiple sample space
-library(cluster)
-library(factoextra)
-?clara
-clara_result <- clara(n_data, k = 6, samples = 50, metric = c("euclidean"))
-plot(clara_result, xlab = "main x", ylab = "main y")
+first_col <- expression_data[, 1]
+df2 <- cbind(first_col, n_data)
+colnames(df2)[1] <- "id"
+head(df2)
+df2 <- df2[, -1]
+head(df2)
+write.csv(df2, "Normalized_GSE11882_expression_data_with_ID.csv", row.names = FALSE)
 
+n_data <- Normalized_GSE11882_expression_data_with_ID
 
-km.out <- kmeans(n_data[ ,-1], centers = 3)
+first_col <- n_data[, 1]
+main_data <- data.frame(lapply(n_data[, -1], as.numeric))
+main_data <- na.omit(main_data)
+
+install.packages("clValid")
+library(clValid)
+
+# k means for k - 2
+km.out <- kmeans(main_data, centers = 2)
 print(km.out)
+cluster_centers <- km.out$centers
+cluster_centers_df <- data.frame(cluster_centers)
+cluster_centers_with_strings <- cbind(first_col[1:nrow(cluster_centers_df)], cluster_centers_df)
+print(cluster_centers_with_strings)
+write.csv(cluster_centers_with_strings, "cluster_centers11882_k2.csv", row.names = FALSE)
+
+set.seed(1234)
 
 
-km.clusters <- km.out$cluster
-print(table(km.out$centers))
-write.csv(km.out$centers,  "cluster centers", row.names = FALSE)
-print(table(km.clusters))
-print(km.clusters)
-rownames(n_data) <- paste(data$X, 1: dim(n_data)[1], sep = "_")
+# k means for k - 3
+km.out <- kmeans(main_data, centers = 3)
+print(km.out)
+cluster_centers <- km.out$centers
+cluster_centers_df <- data.frame(cluster_centers)
+cluster_centers_with_strings <- cbind(first_col[1:nrow(cluster_centers_df)], cluster_centers_df)
+print(cluster_centers_with_strings)
+write.csv(cluster_centers_with_strings, "cluster_centers11882_k3.csv", row.names = FALSE)
 
-fviz_cluster(list(data = n_data[,-1], cluster = km.clusters))
-table(km.clusters, data$X)
+# problem with findint the dunn index
+dunn_index <- dunn(clusters = cluster_centers, Data = main_data)
+print(dunn_index)
+
+# problem with sillhoutte index finding
+print(km.out$cluster)
+dist_matrix <- dist(main_data)
+sil <- silhouette(km.out$cluster, dist_matrix)
 
 
-# chat gpt
+# k means for k - 4
+km.out <- kmeans(main_data, centers = 4)
+print(km.out)
+cluster_centers <- km.out$centers
+cluster_centers_df <- data.frame(cluster_centers)
+cluster_centers_with_strings <- cbind(first_col[1:nrow(cluster_centers_df)], cluster_centers_df)
+print(cluster_centers_with_strings)
+write.csv(cluster_centers_with_strings, "cluster_centers11882_k4.csv", row.names = FALSE)
 
-library(factoextra)
-fviz_cluster(list(data = n_data, cluster = km.clusters), 
-             geom = "point", # change geometry
-             ellipse.type = "norm", # add normal confidence ellipses
-             palette = "jco", # use a different color palette
-             ggtheme = theme_minimal()) # use a minimal theme
+# k means for k - 5
+km.out <- kmeans(main_data, centers = 5)
+print(km.out)
+cluster_centers <- km.out$centers
+cluster_centers_df <- data.frame(cluster_centers)
+cluster_centers_with_strings <- cbind(first_col[1:nrow(cluster_centers_df)], cluster_centers_df)
+print(cluster_centers_with_strings)
+write.csv(cluster_centers_with_strings, "cluster_centers11882_k5.csv", row.names = FALSE)
+
+
 
